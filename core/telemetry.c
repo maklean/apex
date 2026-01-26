@@ -4,7 +4,10 @@
 #include <string.h>
 
 // Puts `buffer_size`-1 characters from the file at `file_path` into `buffer`.
-static int read_file_into_buffer(const char *file_path, char *buffer, size_t buffer_size);
+static int read_line_into_buffer(const char *file_path, char *buffer, size_t buffer_size);
+
+// Calculates the CPU Usage over `CPU_USAGE_SLEEP_MS` ms in time.
+static int calculate_cpu_usage();
 
 int collect_vitals(SystemVitals *vitals) {
     if(!vitals) return ERR_INVALID_VITALS_PTR;
@@ -15,7 +18,7 @@ int collect_vitals(SystemVitals *vitals) {
 int get_kernel_version(char *buffer, size_t size) {
     if(!buffer) return ERR_INVALID_BUFFER_PTR;
 
-    int res = read_file_into_buffer(KERNEL_VERSION_PATH, buffer, size);
+    int res = read_line_into_buffer(KERNEL_VERSION_PATH, buffer, size);
     if(res != C_OK) return res;
 
     // remove newline
@@ -27,7 +30,7 @@ int get_kernel_version(char *buffer, size_t size) {
     return C_OK;
 }
 
-int read_file_into_buffer(const char *file_path, char *buffer, size_t buffer_size) {
+int read_line_into_buffer(const char *file_path, char *buffer, size_t buffer_size) {
     if(!file_path) return ERR_INVALID_FILE_PATH_PTR;
     if(!buffer) return ERR_INVALID_BUFFER_PTR;
 
@@ -35,14 +38,10 @@ int read_file_into_buffer(const char *file_path, char *buffer, size_t buffer_siz
     FILE *fPtr = fopen(file_path, "r");
     if(!fPtr) return ERR_FAILED_TO_OPEN_FILE;
 
-    // read 'buffer_size' characters into bufer
-    size_t n = fread(buffer, 1, buffer_size-1, fPtr);
-    if(ferror(fPtr)) {
-        fclose(fPtr);
-        return ERR_FAILED_TO_READ_INTO_BUFFER;
-    }
+    // read 'buffer_size'-1 characters into bufer
+    if(!fgets(buffer, buffer_size, fPtr)) return ERR_FAILED_TO_READ_INTO_BUFFER;
 
-    buffer[n] = '\0';
+    fclose(fPtr);
 
     return C_OK;
 }

@@ -13,6 +13,7 @@
 #define ERR_FAILED_TO_READ_INTO_BUFFER -5
 
 #define KERNEL_VERSION_PATH "/proc/version"
+#define CPU_USAGE_SLEEP_MS 5000
 
 typedef struct {
     double cpu_usage_percentage;
