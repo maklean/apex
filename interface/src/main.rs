@@ -4,6 +4,7 @@ use std::os::raw::c_char;
 #[link(name="apex-telemetry", kind="static")]
 unsafe extern "C" {
     fn get_kernel_version(buffer: *mut c_char, size: usize) -> i32;
+    fn calculate_cpu_usage(cpu_usage: *mut f64, time_ms: i32) -> i32;
 }
 
 fn main() {
@@ -26,4 +27,11 @@ fn main() {
         "Result Code: {result_code}\n\nKernel Version: {}", 
         s.to_str().expect("Failed to convert CStr to str")
     );
+
+    let mut cpu_usage: f64 = -1f64;
+    let time_ms = 2000;
+
+    unsafe { calculate_cpu_usage(&mut cpu_usage as *mut f64, time_ms) };
+    
+    println!("CPU Usage ({}s): {cpu_usage:.2}%", time_ms / 1000);
 }

@@ -9,7 +9,7 @@
 static int read_line_into_buffer(const char *file_path, char *buffer, size_t buffer_size);
 
 // Calculates the CPU Usage over `time_ms` ms in time.
-static int calculate_cpu_usage(double *cpu_usage, int time_ms);
+int calculate_cpu_usage(double *cpu_usage, int time_ms);
 
 // Injects the jiffies into the `jiffies` array.
 static int inject_jiffies(long int jiffies[2]);
