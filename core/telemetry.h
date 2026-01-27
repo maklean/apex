@@ -7,13 +7,13 @@
 #define C_OK 0
 
 #define ERR_INVALID_VITALS_PTR -1
-#define ERR_INVALID_BUFFER_PTR -2
+#define ERR_INVALID_ARG_PTR -2
 #define ERR_INVALID_FILE_PATH_PTR -3
 #define ERR_FAILED_TO_OPEN_FILE -4
 #define ERR_FAILED_TO_READ_INTO_BUFFER -5
 
 #define KERNEL_VERSION_PATH "/proc/version"
-#define CPU_USAGE_SLEEP_MS 5000
+#define CPU_USAGE_BUFFER 256
 
 typedef struct {
     double cpu_usage_percentage;
