@@ -11,7 +11,7 @@ fn main() {
     let mut buffer: [u8; 512] = [0; 512]; // create 512 bytes array
 
     let buffer_ptr: *mut c_char = buffer.as_mut_ptr() as *mut c_char; // need to convert into array of c_char to read string
-    let result_code;
+    let mut result_code;
 
     // read kernel version into buffer_ptr
     unsafe { result_code = get_kernel_version(buffer_ptr, 512) };
@@ -31,7 +31,7 @@ fn main() {
     let mut cpu_usage: f64 = -1f64;
     let time_ms = 2000;
 
-    unsafe { calculate_cpu_usage(&mut cpu_usage as *mut f64, time_ms) };
+    unsafe { result_code = calculate_cpu_usage(&mut cpu_usage as *mut f64, time_ms) };
     
-    println!("CPU Usage ({}s): {cpu_usage:.2}%", time_ms / 1000);
+    println!("\nResult Code: {}\nCPU Usage ({}s): {cpu_usage:.2}%", result_code, time_ms / 1000);
 }
