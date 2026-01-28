@@ -5,7 +5,6 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <stdint.h>
-#include <limits.h>
 
 // Puts `buffer_size`-1 characters from the file at `file_path` into `buffer`.
 static int read_lines_into_buffer(const char *file_path, char *buffer, size_t buffer_size, size_t line_count);
