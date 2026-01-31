@@ -22,7 +22,7 @@ typedef struct {
     uint64_t total_mem_kb; // total memory
     uint64_t free_mem_kb; // amount of physical ram left unused by the system
     uint64_t available_mem_kb; // estimate of how much memory is available for stating new applications without swapping
-    uint64_t uptime_seconds;
+    uint64_t uptime_seconds; // total time the system has been running since its last restart
     uint16_t network_interface_count;
 } SystemVitals;
 

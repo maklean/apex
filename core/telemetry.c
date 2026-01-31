@@ -18,6 +18,9 @@ int fetch_mem_stats(uint64_t *total_mem_kb, uint64_t *free_mem_kb, uint64_t *ava
 // Injects the jiffies into the `jiffies` array.
 static int inject_jiffies(long int jiffies[2]);
 
+// Fetches uptime seconds and injects it into 'uptime'.
+int fetch_uptime_seconds(uint64_t *uptime);
+
 int collect_vitals(SystemVitals *vitals) {
     if(!vitals) return ERR_INVALID_VITALS_PTR;
 
@@ -167,6 +170,28 @@ int fetch_mem_stats(uint64_t *total_mem_kb, uint64_t *free_mem_kb, uint64_t *ava
         lines = strtok_r(NULL, "\n", &save_lines);
         reading++;
     }
+
+    return C_OK;
+}
+
+int fetch_uptime_seconds(uint64_t *uptime) {
+    if(!uptime) return ERR_INVALID_ARG_PTR;
+
+    char buffer[READ_PROC_FILE_BUFFER] = {0};
+
+    int res;
+    if((res = read_lines_into_buffer("/proc/uptime", buffer, READ_PROC_FILE_BUFFER, 1)) != C_OK) {
+        return res;
+    }
+
+    // make 'buffer' only include the decimal portion (taking only seconds)
+    char *buf_sep = strchr(buffer, '.');
+    if(!buf_sep) return ERR_FAILED_TO_READ_INTO_BUFFER; // there should be a space.
+
+    *buf_sep = '\0';
+    
+    char *end;
+    *uptime = strtoull(buffer, &end, 10); // TODO: should probably do some error checking for this...
 
     return C_OK;
 }
