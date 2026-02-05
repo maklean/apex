@@ -5,26 +5,44 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <stdint.h>
+#include <dirent.h>
 
 // Puts `buffer_size`-1 characters from the file at `file_path` into `buffer`.
 static int read_lines_into_buffer(const char *file_path, char *buffer, size_t buffer_size, size_t line_count);
 
 // Calculates the CPU Usage over `time_ms` ms in time.
-int calculate_cpu_usage(double *cpu_usage, int time_ms);
+static int calculate_cpu_usage(double *cpu_usage, int time_ms);
 
 // Fetches the memory stats and injects them into the given pointers.
-int fetch_mem_stats(uint64_t *total_mem_kb, uint64_t *free_mem_kb, uint64_t *available_mem_kb);
+static int fetch_mem_stats(uint64_t *total_mem_kb, uint64_t *free_mem_kb, uint64_t *available_mem_kb);
 
 // Injects the jiffies into the `jiffies` array.
 static int inject_jiffies(long int jiffies[2]);
 
 // Fetches uptime seconds and injects it into 'uptime'.
-int fetch_uptime_seconds(uint64_t *uptime);
+static int fetch_uptime_seconds(uint64_t *uptime);
+
+// Fetches the network interface count and injects it into 'nic'.
+static int fetch_nic(uint16_t *nic);
 
 int collect_vitals(SystemVitals *vitals) {
     if(!vitals) return ERR_INVALID_VITALS_PTR;
 
-    return C_OK;
+    int res;
+
+    if((res = calculate_cpu_usage(&vitals->cpu_usage_percentage, CPU_USAGE_DELAY)) != C_OK) {
+        return res;
+    }
+
+    if((res = fetch_mem_stats(&vitals->total_mem_kb, &vitals->free_mem_kb, &vitals->available_mem_kb)) != C_OK) {
+        return res;
+    }
+
+    if((res = fetch_uptime_seconds(&vitals->uptime_seconds)) != C_OK) {
+        return res;
+    }
+
+    return fetch_nic(&vitals->network_interface_count);
 }
 
 int get_kernel_version(char *buffer, size_t size) {
@@ -98,7 +116,7 @@ int inject_jiffies(long int jiffies[2]) {
     int res;
 
     char buffer[READ_PROC_FILE_BUFFER] = {0};
-    if((res = read_lines_into_buffer("/proc/stat", buffer, READ_PROC_FILE_BUFFER, 1)) != C_OK) {
+    if((res = read_lines_into_buffer(SYS_ACTIVITY_STATS_PATH, buffer, READ_PROC_FILE_BUFFER, 1)) != C_OK) {
         return res;
     }
 
@@ -133,18 +151,18 @@ int fetch_mem_stats(uint64_t *total_mem_kb, uint64_t *free_mem_kb, uint64_t *ava
     int res;
     char buffer[READ_PROC_FILE_BUFFER] = {0};
     
-    if((res = read_lines_into_buffer("/proc/meminfo", buffer, READ_PROC_FILE_BUFFER, 3)) != C_OK) {
+    if((res = read_lines_into_buffer(SYS_MEM_INFO_PATH, buffer, READ_PROC_FILE_BUFFER, 3)) != C_OK) {
         return res;
     }
 
     char *save_lines;
     char *lines = strtok_r(buffer, "\n", &save_lines);
     
-    char *dup; // TODO: is there a better alternative than strdup()? (b/c strtok'ing for two diff. things just breaks everything)
+    char *dup;
     char *dup_sep;
     char *save_dup;
 
-    size_t reading = 0; // 0 = memtotal, 1 = memfree, 2 = memavailable
+    uint8_t reading = 0; // 0 = memtotal, 1 = memfree, 2 = memavailable
 
     uint64_t val;
     char *end;
@@ -180,7 +198,7 @@ int fetch_uptime_seconds(uint64_t *uptime) {
     char buffer[READ_PROC_FILE_BUFFER] = {0};
 
     int res;
-    if((res = read_lines_into_buffer("/proc/uptime", buffer, READ_PROC_FILE_BUFFER, 1)) != C_OK) {
+    if((res = read_lines_into_buffer(SYS_UPTIME_PATH, buffer, READ_PROC_FILE_BUFFER, 1)) != C_OK) {
         return res;
     }
 
@@ -192,6 +210,26 @@ int fetch_uptime_seconds(uint64_t *uptime) {
     
     char *end;
     *uptime = strtoull(buffer, &end, 10); // TODO: should probably do some error checking for this...
+
+    return C_OK;
+}
+
+int fetch_nic(uint16_t *nic) {
+    if(!nic) return ERR_INVALID_ARG_PTR;
+
+    DIR *d = opendir(SYS_NIC_DIR);
+    if(!d) return ERR_FAILED_TO_OPEN_DIRECTORY;
+
+    struct dirent *de;
+    uint16_t count = 0;
+
+    while((de = readdir(d)) != NULL) {
+        if(strcmp(de->d_name, ".") == 0 || strcmp(de->d_name, "..") == 0) continue;
+        count++;
+    }
+
+    *nic = count;
+    closedir(d);
 
     return C_OK;
 }

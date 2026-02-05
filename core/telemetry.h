@@ -13,9 +13,16 @@
 #define ERR_FAILED_TO_READ_INTO_BUFFER -5
 #define ERR_FAILED_TO_DUPLICATE_PROC_LINE -6
 #define ERR_FAILED_TO_PARSE_MEMORY_AMOUNT -7
+#define ERR_FAILED_TO_OPEN_DIRECTORY -8
 
 #define KERNEL_VERSION_PATH "/proc/version"
-#define READ_PROC_FILE_BUFFER 256
+#define SYS_ACTIVITY_STATS_PATH "/proc/stat"
+#define SYS_MEM_INFO_PATH "/proc/meminfo"
+#define SYS_UPTIME_PATH "/proc/uptime"
+#define SYS_NIC_DIR "/sys/class/net"
+
+#define READ_PROC_FILE_BUFFER 256 // 256 bytes
+#define CPU_USAGE_DELAY 2000 // 2000ms
 
 typedef struct {
     double cpu_usage_percentage;
