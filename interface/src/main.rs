@@ -1,7 +1,8 @@
 use std::ffi::CStr;
 use std::os::raw::c_char;
 
-pub struct SystemVitals {
+#[repr(C)]
+struct SystemVitals {
     cpu_usage_percentage: f64,
     total_mem_kb: u64,
     free_mem_kb: u64,
@@ -54,6 +55,11 @@ fn main() {
     unsafe {
         result_code = collect_vitals(&mut vitals as *mut SystemVitals);
     };
+
+    if result_code != 0 {
+        println!("Error: {result_code}");
+        return;
+    }
 
     println!("\ncollect_vitals() Result Code: {result_code}\n");
     print_system_vitals(&vitals);

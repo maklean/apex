@@ -64,6 +64,9 @@ int read_lines_into_buffer(const char *file_path, char *buffer, size_t buffer_si
     if(!file_path) return ERR_INVALID_FILE_PATH_PTR;
     if(!buffer) return ERR_INVALID_ARG_PTR;
 
+    // make sure to zero buffer (since we're using strcat())
+    memset(buffer, 0, buffer_size);
+
     // considering I'm only using this to read text files in /proc atm, 'r' should be a good enough mode
     FILE *fPtr = fopen(file_path, "r");
     if(!fPtr) return ERR_FAILED_TO_OPEN_FILE;
@@ -115,7 +118,7 @@ int inject_jiffies(long int jiffies[2]) {
 
     int res;
 
-    char buffer[READ_PROC_FILE_BUFFER] = {0};
+    char buffer[READ_PROC_FILE_BUFFER];
     if((res = read_lines_into_buffer(SYS_ACTIVITY_STATS_PATH, buffer, READ_PROC_FILE_BUFFER, 1)) != C_OK) {
         return res;
     }
@@ -149,7 +152,7 @@ int fetch_mem_stats(uint64_t *total_mem_kb, uint64_t *free_mem_kb, uint64_t *ava
     if(!total_mem_kb || !free_mem_kb || !available_mem_kb) return ERR_INVALID_ARG_PTR;
 
     int res;
-    char buffer[READ_PROC_FILE_BUFFER] = {0};
+    char buffer[READ_PROC_FILE_BUFFER];
     
     if((res = read_lines_into_buffer(SYS_MEM_INFO_PATH, buffer, READ_PROC_FILE_BUFFER, 3)) != C_OK) {
         return res;
@@ -195,7 +198,7 @@ int fetch_mem_stats(uint64_t *total_mem_kb, uint64_t *free_mem_kb, uint64_t *ava
 int fetch_uptime_seconds(uint64_t *uptime) {
     if(!uptime) return ERR_INVALID_ARG_PTR;
 
-    char buffer[READ_PROC_FILE_BUFFER] = {0};
+    char buffer[READ_PROC_FILE_BUFFER];
 
     int res;
     if((res = read_lines_into_buffer(SYS_UPTIME_PATH, buffer, READ_PROC_FILE_BUFFER, 1)) != C_OK) {
