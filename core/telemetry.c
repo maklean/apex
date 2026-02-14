@@ -129,7 +129,6 @@ int inject_jiffies(long int jiffies[2]) {
     long int total = 0; // sum of everything.
     long int work = 0; // sum of normal and niced processes in user mode, and processes in kernel mode (first 3)
 
-    // TODO: should probably iterate a specific amount of times instead of waiting for buf_sep to hit null
     size_t i = 0;
     long int n;
     while(buf_sep != NULL) {
@@ -212,7 +211,7 @@ int fetch_uptime_seconds(uint64_t *uptime) {
     *buf_sep = '\0';
     
     char *end;
-    *uptime = strtoull(buffer, &end, 10); // TODO: should probably do some error checking for this...
+    *uptime = strtoull(buffer, &end, 10);
 
     return C_OK;
 }
